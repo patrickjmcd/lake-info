@@ -176,6 +176,14 @@ func updateInfluxdb(level string, turbineRelease string, spillwayRelease string,
 		port = influxdbPort
 	}
 
+	username := os.Getenv("INFLUXDB_USERNAME")
+	password := os.Getenv("INFLUXDB_PASSWORD")
+
+	token := ""
+	if username != "" && password != "" {
+		token = fmt.Sprintf("%s:%s", username, password)
+	}
+
 	prefix := os.Getenv("INFLUXDB_PREFIX")
 	if prefix == "" {
 		return errors.New("no INFLUXDB_PREFIX specified")
@@ -188,7 +196,7 @@ func updateInfluxdb(level string, turbineRelease string, spillwayRelease string,
 	}
 
 	influxdbURI := fmt.Sprintf("http://%s:%s", server, port)
-	client := influxdb2.NewClient(influxdbURI, "")
+	client := influxdb2.NewClient(influxdbURI, token)
 	writeAPI := client.WriteApiBlocking("", database)
 
 	err := publishToInfluxdb(writeAPI, prefix, "level", level)
