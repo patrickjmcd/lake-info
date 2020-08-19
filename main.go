@@ -144,7 +144,7 @@ func updateMQTT(level string, turbineRelease string, spillwayRelease string, tot
 	return nil
 }
 
-func publishToInfluxdb(writeAPI api.WriteApiBlocking, prefix string, name string, value string) error {
+func publishToInfluxdb(writeAPI api.WriteAPIBlocking, prefix string, name string, value string) error {
 	fullName := fmt.Sprintf("%s%s", prefix, name)
 	units := "cfps"
 	if name == "level" {
@@ -195,9 +195,15 @@ func updateInfluxdb(level string, turbineRelease string, spillwayRelease string,
 		database = influxDatabase
 	}
 
-	influxdbURI := fmt.Sprintf("http://%s:%s", server, port)
+	protocol := "http"
+	envProtocol := os.Getenv("INFLUXDB_USE_SSL")
+	if envProtocol == "yes" {
+		protocol = "https"
+	}
+
+	influxdbURI := fmt.Sprintf("%s://%s:%s", protocol, server, port)
 	client := influxdb2.NewClient(influxdbURI, token)
-	writeAPI := client.WriteApiBlocking("", database)
+	writeAPI := client.WriteAPIBlocking("", database)
 
 	err := publishToInfluxdb(writeAPI, prefix, "level", level)
 	err = publishToInfluxdb(writeAPI, prefix, "turbine_release", turbineRelease)
