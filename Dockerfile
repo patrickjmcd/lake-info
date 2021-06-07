@@ -1,9 +1,9 @@
 
-FROM golang
+FROM python:3
 
-WORKDIR /go/src/github.com/patrickjmcd/lake-info
-ADD main.go .
-RUN go get -v -d
-RUN go install github.com/patrickjmcd/lake-info
+WORKDIR /app
+ADD lake-info .
 
-ENTRYPOINT /go/bin/lake-info
+RUN pip3 install -r requirements.txt
+
+CMD ["python3", "main.py"]
