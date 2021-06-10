@@ -4,7 +4,7 @@ from os import getenv
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
-def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen"):
+def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen", level_value=None):
     """Writes data to influxdb client in env properties."""
     client = InfluxDBClient.from_env_properties()
     # client = InfluxDBClient(url=getenv("INFLUXDB_V2_URL"), org=getenv(
@@ -25,15 +25,20 @@ def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen"):
             "valueNum", last_point['total_release_cfs']).field("value", float(last_point['total_release_cfs']))  # .time(last_point['timestamp']),
     ]
 
+    if level_value:
+        points.append(Point("{}_temperature".format(lake_prefix)).tag("units", "ºF").field(
+            "valueNum", level_value).field("value", level_value))
+
     for i in points:
         write_api.write(bucket, 'patrickjmcd', i)
+        print("Wrote {}".format(i._name))
 
-    query_api = client.query_api()
-    # using Table structure
-    tables = query_api.query(
-        'from(bucket:"{}") |> range(start: -60m)'.format(bucket), org="patrickjmcd")
+    # query_api = client.query_api()
+    # # using Table structure
+    # tables = query_api.query(
+    #     'from(bucket:"{}") |> range(start: -60m)'.format(bucket), org="patrickjmcd")
 
-    for table in tables:
-        print(table)
-        for row in table.records:
-            print(row.values)
+    # for table in tables:
+    #     print(table)
+    #     for row in table.records:
+    #         print(row.values)
