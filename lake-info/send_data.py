@@ -4,7 +4,7 @@ from os import getenv
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
-def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen", level_value=None):
+def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen", lake_temp=None):
     """Writes data to influxdb client in env properties."""
     client = InfluxDBClient.from_env_properties()
     # client = InfluxDBClient(url=getenv("INFLUXDB_V2_URL"), org=getenv(
@@ -25,9 +25,9 @@ def send_data(data_table, lake_prefix, bucket="lakeinfo/autogen", level_value=No
             "valueNum", last_point['total_release_cfs']).field("value", float(last_point['total_release_cfs']))  # .time(last_point['timestamp']),
     ]
 
-    if level_value:
+    if lake_temp:
         points.append(Point("{}_temperature".format(lake_prefix)).tag("units", "ºF").field(
-            "valueNum", level_value).field("value", level_value))
+            "valueNum", lake_temp).field("value", lake_temp))
 
     for i in points:
         write_api.write(bucket, 'patrickjmcd', i)
