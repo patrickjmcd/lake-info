@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/patrickjmcd/lake-info/compare/v1.3.0...v1.3.1) (2023-12-18)
+
+
+### Bug Fixes
+
+* use PAT secret ([113a991](https://github.com/patrickjmcd/lake-info/commit/113a991acf7c1dad946e7e0285301160ac57341a))
+
 ## [1.3.0](https://github.com/patrickjmcd/lake-info/compare/v1.2.0...v1.3.0) (2023-12-18)
 
 
