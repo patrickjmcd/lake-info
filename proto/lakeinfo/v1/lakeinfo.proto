@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package lakeinfo.v1;
+
+import "google/protobuf/timestamp.proto";
+import "tagger/tagger.proto";
+
+option go_package = "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1;lakeinfov1";
+
+message LakeInfoMeasurement {
+  string lake_name = 1 [(tagger.tags) = 'bson:"lakeName"'];
+  double level = 2 [(tagger.tags) = 'bson:"level"'];
+  double temperature = 3 [(tagger.tags) = 'bson:"temperature"'];
+  double generation = 4 [(tagger.tags) = 'bson:"generation"'];
+  double turbine_release_rate = 5 [(tagger.tags) = 'bson:"turbineReleaseRate"'];
+  double spillway_release_rate = 6 [(tagger.tags) = 'bson:"spillwayReleaseRate"'];
+  double total_release_rate = 7 [(tagger.tags) = 'bson:"totalReleaseRate"'];
+  google.protobuf.Timestamp measured_at = 8 [(tagger.tags) = 'bson:"measuredAt"'];
+  google.protobuf.Timestamp created_at = 9 [(tagger.tags) = 'bson:"createdAt"'];
+}
+
+message GetLakeInfoRequest {
+  string lake_name = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  bool latest = 4;
+}
+
+message GetLakeInfoResponse {
+  repeated LakeInfoMeasurement measurements = 1;
+}
+
+message StoreLakeInfoRequest {
+  repeated LakeInfoMeasurement measurements = 1;
+}
+
+message StoreLakeInfoResponse {}
+
+service LakeInfoService {
+  rpc GetLakeInfo(GetLakeInfoRequest) returns (GetLakeInfoResponse) {}
+  rpc StoreLakeInfo(StoreLakeInfoRequest) returns (StoreLakeInfoResponse) {}
+}
