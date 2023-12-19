@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/patrickjmcd/lake-info/compare/v1.3.1...v1.4.0) (2023-12-19)
+
+
+### Features
+
+* reorganize for creating an executable ([47a948c](https://github.com/patrickjmcd/lake-info/commit/47a948cb6933da151b2f41b79c92d8834f4fb109))
+
 ## [1.3.1](https://github.com/patrickjmcd/lake-info/compare/v1.3.0...v1.3.1) (2023-12-18)
 
 
