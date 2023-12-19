@@ -43,5 +43,4 @@ jobs:
       - name: Build Tagged Image
         run: |
           echo "Building image with tag: ${{ steps.get_image_tag.outputs.image_tag }}"
-          ko build --platform=linux/arm64,linux/amd64 --bare --tags=${{ steps.get_image_tag.outputs.image_tag }},latest cmd/main.go
-          
+          ko build --platform=linux/arm64,linux/amd64 --bare --tags=${{ steps.get_image_tag.outputs.image_tag }},latest main.go
