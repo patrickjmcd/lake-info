@@ -2,12 +2,13 @@ package tablerock
 
 import (
 	"fmt"
-	"github.com/labstack/gommon/log"
-	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
-	"github.com/patrickjmcd/lake-info/lib/measurement"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
+
+	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
+	"github.com/patrickjmcd/lake-info/lib/measurement"
 )
 
 const LakeURL = "https://www.swl-wc.usace.army.mil/pages/data/tabular/htm/tab7d.htm"
@@ -37,9 +38,13 @@ func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
 					measurements = append(measurements, v)
 				}
 			}
+			if len(measurements) == 0 {
+				continue
+			}
+
 			record, err := measurement.ParseMeasurement(measurements, LakeName)
 			if err != nil {
-				log.Error(err)
+				slog.Error("error parsing measurement", "error", err, "measurements", measurements)
 				continue
 			}
 			records = append(records, record)

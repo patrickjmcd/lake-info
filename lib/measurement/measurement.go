@@ -1,11 +1,12 @@
 package measurement
 
 import (
-	"fmt"
-	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"log/slog"
 	"strconv"
 	"time"
+
+	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func parseDatetime(dateStr string, timeStr string) (*time.Time, error) {
@@ -24,7 +25,7 @@ func parseDatetime(dateStr string, timeStr string) (*time.Time, error) {
 	// Parse the combined string to a time.Time value
 	result, err := time.Parse(layout, combinedString)
 	if err != nil {
-		fmt.Println(err)
+		slog.Error("error parsing datetime", "error", err)
 		return nil, err
 	}
 	if addDate {

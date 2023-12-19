@@ -3,21 +3,26 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"log/slog"
+	"net/http"
+	"os"
+
 	"github.com/patrickjmcd/lake-info/dal"
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
 	"github.com/patrickjmcd/lake-info/gen/lakeinfo/v1/lakeinfoconnect"
 	"github.com/patrickjmcd/lake-info/lib/tablerock"
+	"github.com/patrickjmcd/lake-info/logger"
 	"github.com/patrickjmcd/lake-info/server"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
-	"log"
-	"net/http"
 )
 
 var (
 	port       string
 	allRecords bool
+	dryRun     bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -44,26 +49,37 @@ var scrapeCmd = &cobra.Command{
 
 		if args[0] == "tablerock" {
 			ctx := context.Background()
-			dalCli, err := dal.New()
 			var recordsToStore []*lakeinfov1.LakeInfoMeasurement
 
 			if allRecords {
 				if r, err := tablerock.GetAllRecords(tablerock.LakeURL); err != nil {
-					log.Fatal(err)
+					slog.Error("error getting all records", "error", err)
 				} else {
 					recordsToStore = r
 				}
 			} else {
 				record, err := tablerock.GetLatestRecord(tablerock.LakeURL)
 				if err != nil {
-					log.Fatal(err)
+					slog.Error("error getting latest record", "error", err)
 				}
 				recordsToStore = append(recordsToStore, record)
 			}
 
+			if dryRun {
+				for _, record := range recordsToStore {
+					slog.Info("got record", "record", record)
+				}
+				return
+			}
+			dalCli, err := dal.New()
+			if err != nil {
+				slog.Error("error creating dal client", "error", err)
+				os.Exit(1)
+			}
 			err = dalCli.StoreLakeInfo(ctx, recordsToStore)
 			if err != nil {
-				log.Fatal(err)
+				slog.Error("error storing lake info", "error", err)
+				os.Exit(1)
 			}
 		}
 
@@ -83,10 +99,11 @@ var serveCmd = &cobra.Command{
 		mux := http.NewServeMux()
 		path, handler := lakeinfoconnect.NewLakeInfoServiceHandler(lakeInfoServer)
 		mux.Handle(path, handler)
+		address := fmt.Sprintf("localhost:%s", port)
 
-		log.Println("Starting server on localhost:8080")
+		slog.Info(fmt.Sprintf("Starting server on localhost:%s", port))
 		http.ListenAndServe(
-			fmt.Sprintf("localhost:%s", port),
+			address,
 			// Use h2c so we can serve HTTP/2 without TLS.
 			h2c.NewHandler(mux, &http2.Server{}),
 		)
@@ -101,20 +118,23 @@ var setupCmd = &cobra.Command{
 		ctx := context.Background()
 		dalClient, err := dal.New()
 		if err != nil {
-			panic(err)
+			slog.Error("error creating dal client", "error", err)
+			os.Exit(1)
 		}
 		err = dalClient.Setup(ctx)
 		if err != nil {
-			panic(err)
+			slog.Error("error setting up database", "error", err)
+			os.Exit(1)
 		}
-
 	},
 }
 
 func init() {
+	logger.Setup()
 	rootCmd.AddCommand(scrapeCmd)
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(setupCmd)
 	scrapeCmd.Flags().BoolVarP(&allRecords, "all", "A", false, "Get all records")
+	scrapeCmd.Flags().BoolVarP(&dryRun, "dry-run", "D", false, "Dry run")
 	serveCmd.Flags().StringVarP(&port, "port", "p", "8080", "Port to serve on")
 }
