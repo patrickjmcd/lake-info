@@ -1,20 +1,50 @@
 # lake-info
 
-Docker Image to fetch lake levels from the US Army Corps of Engineers and send it to MQTT or Influxdb
+CLI to fetch data from the US Army Corps of Engineers on Lake Levels. Currently only supports Table Rock Lake.
 
-## Environment Variables
+## Installation
 
-The following environment variables are used to configure the container:
+```shell
+go install github.com/patrickjmcd/lake-info@latest
+```
 
--   USACE_URL (required): The URL of the US Army Corps of Engineers dam table.
--   INFLUXDB_SERVER: the url of the influxdb server
--   INFLUXDB_PORT: default 8086, port used to connect to influxdb server
--   INFLUXDB_USERNAME: default "", username for connecting to the influxdb server
--   INFLUXDB_PASSWORD: default "", password for connecting to the influxdb server
--   INFLUXDB_DATABASE: default "lakeinfo", database to use for storing measurements
--   INFLUXDB_PREFIX: default "", prefix (usually the lake name separated by underscores) for the measurements stored in the influxdb server
--   MQTT_SERVER: the url of the MQTT server
--   MQTT_PORT: default 1883, port used to connect to MQTT server
--   MQTT_USERNAME: default "", username for connecting to the MQTT server
--   MQTT_PASSWORD: default "", password for connecting to the MQTT server
--   MQTT_PREFIX: default "", prefix (usually the lake name separated by underscores) for the measurements stored in the MQTT server
+## Configuration
+
+The following environment variables are used to configure the application:
+
+-   ATLAS_CONNECTION_URI - mongodb URI
+
+## Usage
+
+### Setup
+
+The `setup` command will create the appropriate mongo collections for the data.
+
+```shell
+lake-info setup
+```
+
+### Scrape
+
+The `scrape` command will gather the data from the US Army Corps of Engineers website and store it in the database. 
+An optional `-A` or `--all` flag will force the storage of all available data on the specified lake.
+
+```shell
+lake-info scrape <lake name>
+```
+
+Example:
+
+```shell
+lake-info scrape tablerock -A
+```
+
+### Serve
+
+The `serve` command will run the Connect API server to provide the data to a frontend application.
+An optional `-P` or `--port` flag allows changing the port from the default of `8080`.
+
+```shell
+lake-info serve
+```
+
