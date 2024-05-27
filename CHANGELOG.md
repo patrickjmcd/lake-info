@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/patrickjmcd/lake-info/compare/v1.4.0...v1.5.0) (2024-05-27)
+
+
+### Features
+
+* consolidate logging and add dry-run option ([ea8a926](https://github.com/patrickjmcd/lake-info/commit/ea8a926a3a18705cfdf6b412b11d46bdfe11a302))
+
 ## [1.4.0](https://github.com/patrickjmcd/lake-info/compare/v1.3.1...v1.4.0) (2023-12-19)
 
 
