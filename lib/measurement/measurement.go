@@ -23,7 +23,7 @@ func parseDatetime(dateStr string, timeStr string) (*time.Time, error) {
 	layout := "02Jan20061504"
 
 	// Parse the combined string to a time.Time value
-	result, err := time.Parse(layout, combinedString)
+	result, err := time.ParseInLocation(layout, combinedString, time.Local)
 	if err != nil {
 		slog.Error("error parsing datetime", "error", err)
 		return nil, err

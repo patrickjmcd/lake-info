@@ -6,3 +6,11 @@ plugins:
   - plugin: connect-go
     out: gen
     opt: paths=source_relative
+  # OPENAPI
+  - plugin: buf.build/grpc-ecosystem/openapiv2
+    out: swagger
+    opt:
+      - logtostderr=true
+      - json_names_for_fields=true
+      - allow_merge=true
+      - output_format=yaml

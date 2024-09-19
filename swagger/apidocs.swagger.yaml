@@ -1,0 +1,70 @@
+swagger: "2.0"
+info:
+  title: tagger/tagger.proto
+  version: version not set # x-release-please-version
+tags:
+  - name: LakeInfoService
+consumes:
+  - application/json
+produces:
+  - application/json
+paths: {}
+definitions:
+  protobufAny:
+    type: object
+    properties:
+      '@type':
+        type: string
+    additionalProperties: {}
+  rpcStatus:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      details:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/protobufAny'
+  v1GetLakeInfoResponse:
+    type: object
+    properties:
+      measurements:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/v1LakeInfoMeasurement'
+  v1LakeInfoMeasurement:
+    type: object
+    properties:
+      lakeName:
+        type: string
+      level:
+        type: number
+        format: double
+      temperature:
+        type: number
+        format: double
+      generation:
+        type: number
+        format: double
+      turbineReleaseRate:
+        type: number
+        format: double
+      spillwayReleaseRate:
+        type: number
+        format: double
+      totalReleaseRate:
+        type: number
+        format: double
+      measuredAt:
+        type: string
+        format: date-time
+      createdAt:
+        type: string
+        format: date-time
+  v1StoreLakeInfoResponse:
+    type: object
