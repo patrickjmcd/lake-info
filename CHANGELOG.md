@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/patrickjmcd/lake-info/compare/v1.5.0...v1.6.0) (2024-09-19)
+
+
+### Features
+
+* store in google sheet too ([19ee439](https://github.com/patrickjmcd/lake-info/commit/19ee439b4f08c930ac37ceee7621ebbe31df681c))
+
 ## [1.5.0](https://github.com/patrickjmcd/lake-info/compare/v1.4.0...v1.5.0) (2024-05-27)
 
 
