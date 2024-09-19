@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/patrickjmcd/lake-info/compare/v1.6.0...v1.6.1) (2024-09-19)
+
+
+### Bug Fixes
+
+* uses gsheets for reading and writing ([19e0037](https://github.com/patrickjmcd/lake-info/commit/19e003786df00579476382837a94b38c35ee6b16))
+
 ## [1.6.0](https://github.com/patrickjmcd/lake-info/compare/v1.5.0...v1.6.0) (2024-09-19)
 
 
