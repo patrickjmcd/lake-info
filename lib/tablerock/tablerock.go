@@ -13,6 +13,7 @@ import (
 
 const LakeURL = "https://www.swl-wc.usace.army.mil/pages/data/tabular/htm/tab7d.htm"
 const LakeName = "tablerock"
+const SheetName = "Table Rock Lake"
 
 func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
 	resp, err := http.Get(url)

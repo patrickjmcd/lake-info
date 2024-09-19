@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"context"
+	"github.com/patrickjmcd/gsheets"
 	"github.com/patrickjmcd/lake-info/dal"
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
+	"github.com/patrickjmcd/lake-info/lib/measurement"
 	"github.com/patrickjmcd/lake-info/lib/tablerock"
-	"github.com/patrickjmcd/lake-info/pkg/sheets"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log/slog"
@@ -60,13 +61,18 @@ var scrapeCmd = &cobra.Command{
 			}
 			spreadsheetId := viper.GetString(spreadsheet_id)
 			googleSAB64 := viper.GetString(google_sa_b64)
-
-			sheetsCli, err := sheets.New(ctx, spreadsheetId, nil, &googleSAB64)
+			sheetsCli, err := gsheets.New[*lakeinfov1.LakeInfoMeasurement](
+				ctx,
+				spreadsheetId,
+				gsheets.WithB64ServiceAccount[*lakeinfov1.LakeInfoMeasurement](googleSAB64),
+				gsheets.WithParseRowFn[*lakeinfov1.LakeInfoMeasurement](measurement.MapRowToMeasurement),
+				gsheets.WithFormatRowFn[*lakeinfov1.LakeInfoMeasurement](measurement.MakeMeasurementRow),
+			)
 			if err != nil {
 				slog.Error("error creating sheets client", "error", err)
 				os.Exit(1)
 			}
-			err = sheetsCli.WriteMeasurements(ctx, sheets.TableRockLake, recordsToStore)
+			err = sheetsCli.AppendToSheet(ctx, tablerock.SheetName, recordsToStore)
 
 			dalCli, err := dal.New()
 			if err != nil {
@@ -78,7 +84,7 @@ var scrapeCmd = &cobra.Command{
 				slog.Error("error storing lake info", "error", err)
 				os.Exit(1)
 			}
-			slog.Info("successfully stored lake info", "lake", sheets.TableRockLake, "records", len(recordsToStore))
+			slog.Info("successfully stored lake info", "lake", tablerock.SheetName, "records", len(recordsToStore))
 		}
 
 	},

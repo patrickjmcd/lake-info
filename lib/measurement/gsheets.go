@@ -1,4 +1,4 @@
-package sheets
+package measurement
 
 import (
 	"context"
@@ -12,6 +12,8 @@ import (
 
 func tryParsingDateString(s string) (time.Time, error) {
 	layouts := []string{
+		"01/02/2006 15:04:05",
+		"1/2/2006 15:04:05",
 		"01/02/2006",
 		"1/2/2006",
 		"1/2/06",
@@ -29,7 +31,7 @@ func tryParsingDateString(s string) (time.Time, error) {
 	return time.Time{}, fmt.Errorf("unable to parse date string: %s", s)
 }
 
-func mapRowToMeasurement(ctx context.Context, row []interface{}) (*lakeinfov1.LakeInfoMeasurement, error) {
+func MapRowToMeasurement(ctx context.Context, row []interface{}) (*lakeinfov1.LakeInfoMeasurement, error) {
 	log.Trace().Interface("row", row).Msg("row")
 	if row == nil || len(row) < 2 {
 		log.Warn().Msg("empty row in sheet")
@@ -132,29 +134,15 @@ func mapRowToMeasurement(ctx context.Context, row []interface{}) (*lakeinfov1.La
 	return measurement, nil
 }
 
-func (c *Client) ReadMeasurements(ctx context.Context, lakeName LakeName) ([]*lakeinfov1.LakeInfoMeasurement, error) {
-
-	readRange := fmt.Sprintf("%s!A2:H", lakeName)
-	resp, err := c.gSheets.Service.Spreadsheets.Values.Get(c.spreadsheetId, readRange).Do()
-	if err != nil {
-		log.Error().Err(err).Msg("unable to retrieve data from sheet")
-		return nil, fmt.Errorf("unable to retrieve data from sheet: %v", err)
+func MakeMeasurementRow(ctx context.Context, measurement *lakeinfov1.LakeInfoMeasurement) []interface{} {
+	return []interface{}{
+		measurement.MeasuredAt.AsTime().Local().Format("01/02/2006 15:04:05"),
+		measurement.Level,
+		measurement.Temperature,
+		measurement.Generation,
+		measurement.TurbineReleaseRate,
+		measurement.SpillwayReleaseRate,
+		measurement.TotalReleaseRate,
+		measurement.CreatedAt.AsTime().Local().Format("01/02/2006 15:04:05"),
 	}
-	var measurements []*lakeinfov1.LakeInfoMeasurement
-
-	for _, row := range resp.Values {
-		log.Trace().Interface("row", row).Msg("row")
-		if row == nil || len(row) < 2 {
-			log.Warn().Msgf("empty row in sheet %s\n", c.sheetName)
-			continue
-		}
-
-		measurement, err := mapRowToMeasurement(ctx, row)
-		if err != nil {
-			log.Error().Err(err).Msg("unable to map row to expert")
-			continue
-		}
-		measurements = append(measurements, measurement)
-	}
-	return measurements, nil
 }
