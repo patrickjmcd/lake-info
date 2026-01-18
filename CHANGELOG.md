@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/patrickjmcd/lake-info/compare/v1.6.1...v1.6.2) (2026-01-18)
+
+
+### Bug Fixes
+
+* use custom HTTP client with insecure TLS for fetching records ([e1df5cd](https://github.com/patrickjmcd/lake-info/commit/e1df5cdcece011b775fd09d133588acc575ba482))
+
 ## [1.6.1](https://github.com/patrickjmcd/lake-info/compare/v1.6.0...v1.6.1) (2024-09-19)
 
 
