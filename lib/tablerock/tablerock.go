@@ -1,6 +1,7 @@
 package tablerock
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log/slog"
@@ -16,7 +17,11 @@ const LakeName = "tablerock"
 const SheetName = "Table Rock Lake"
 
 func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
-	resp, err := http.Get(url)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
