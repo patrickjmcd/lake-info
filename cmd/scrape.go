@@ -85,6 +85,23 @@ var scrapeCmd = &cobra.Command{
 				}
 				return
 			}
+			// Store to MongoDB first: it is the primary store the app reads
+			// from, so a failure here fails the run.
+			dalCli, err := dal.New()
+			if err != nil {
+				slog.Error("error creating dal client", "error", err)
+				os.Exit(1)
+			}
+			if err := dalCli.StoreLakeInfo(ctx, recordsToStore); err != nil {
+				slog.Error("error storing lake info", "error", err)
+				os.Exit(1)
+			}
+			slog.Info("successfully stored lake info", "store", "mongodb", "records", len(recordsToStore))
+
+			// Append to Google Sheets as a best-effort secondary export. A
+			// failure here — e.g. the sheet reaching its row/grid limit — is
+			// logged but must not fail the run or block the primary Mongo store
+			// above.
 			spreadsheetId := viper.GetString(spreadsheet_id)
 			googleSAB64 := viper.GetString(google_sa_b64)
 			sheetsCli, err := gsheets.New[*lakeinfov1.LakeInfoMeasurement](
@@ -95,26 +112,10 @@ var scrapeCmd = &cobra.Command{
 				gsheets.WithFormatRowFn[*lakeinfov1.LakeInfoMeasurement](measurement.MakeMeasurementRow),
 			)
 			if err != nil {
-				slog.Error("error creating sheets client", "error", err)
-				os.Exit(1)
+				slog.Error("error creating sheets client (skipping sheet export)", "error", err)
+			} else if err := sheetsCli.AppendToSheet(ctx, tablerock.SheetName, recordsToStore); err != nil {
+				slog.Error("error appending to sheet (skipping sheet export; Mongo store succeeded)", "error", err)
 			}
-			err = sheetsCli.AppendToSheet(ctx, tablerock.SheetName, recordsToStore)
-			if err != nil {
-				slog.Error("error appending to sheet", "error", err)
-				os.Exit(1)
-			}
-
-			dalCli, err := dal.New()
-			if err != nil {
-				slog.Error("error creating dal client", "error", err)
-				os.Exit(1)
-			}
-			err = dalCli.StoreLakeInfo(ctx, recordsToStore)
-			if err != nil {
-				slog.Error("error storing lake info", "error", err)
-				os.Exit(1)
-			}
-			slog.Info("successfully stored lake info", "lake", tablerock.SheetName, "records", len(recordsToStore))
 		}
 
 	},
