@@ -12,7 +12,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	go.mongodb.org/mongo-driver v1.13.1
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.46.1
-	golang.org/x/net v0.54.0
+	golang.org/x/net v0.55.0
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.10
 )
