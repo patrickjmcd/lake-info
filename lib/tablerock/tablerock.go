@@ -34,6 +34,9 @@ func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
 
 	var records []*lakeinfov1.LakeInfoMeasurement
 	htmlParts := strings.Split(string(bytes), "<hr>")
+	if len(htmlParts) < 2 {
+		return nil, fmt.Errorf("unexpected page format: expected at least 2 sections split by <hr>, got %d", len(htmlParts))
+	}
 	lines := strings.Split(htmlParts[1], "\n")
 	for i, line := range lines {
 		if i > 6 {

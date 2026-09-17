@@ -16,6 +16,7 @@ func (m *Client) StoreLakeInfo(ctx context.Context, measurements []*lakeinfov1.L
 			"lakeName":            v.LakeName,
 			"level":               v.Level,
 			"temperature":         v.Temperature,
+			"generation":          v.Generation,
 			"totalReleaseRate":    v.TotalReleaseRate,
 			"spillwayReleaseRate": v.SpillwayReleaseRate,
 			"turbineReleaseRate":  v.TurbineReleaseRate,
