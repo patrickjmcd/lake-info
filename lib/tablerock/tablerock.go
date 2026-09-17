@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"strings"
 
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
@@ -15,6 +16,11 @@ import (
 const LakeURL = "https://www.swl-wc.usace.army.mil/pages/data/tabular/htm/tab7d.htm"
 const LakeName = "tablerock"
 const SheetName = "Table Rock Lake"
+
+// dataRowDate matches the leading date token of a data row (e.g. "10SEP2026"),
+// used to distinguish data rows from header/separator lines instead of relying
+// on a fixed line offset.
+var dataRowDate = regexp.MustCompile(`^\d{2}[A-Za-z]{3}\d{4}$`)
 
 func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
 	tr := &http.Transport{
@@ -38,26 +44,21 @@ func GetAllRecords(url string) ([]*lakeinfov1.LakeInfoMeasurement, error) {
 		return nil, fmt.Errorf("unexpected page format: expected at least 2 sections split by <hr>, got %d", len(htmlParts))
 	}
 	lines := strings.Split(htmlParts[1], "\n")
-	for i, line := range lines {
-		if i > 6 {
-			var measurements []string
-			linesSplit := strings.Split(line, " ")
-			for _, v := range linesSplit {
-				if v != "" {
-					measurements = append(measurements, v)
-				}
-			}
-			if len(measurements) == 0 {
-				continue
-			}
-
-			record, err := measurement.ParseMeasurement(measurements, LakeName)
-			if err != nil {
-				slog.Error("error parsing measurement", "error", err, "measurements", measurements)
-				continue
-			}
-			records = append(records, record)
+	for _, line := range lines {
+		measurements := strings.Fields(line)
+		// Only attempt to parse lines that start with a date token; this
+		// skips header and separator rows without dropping the first data
+		// row (the old fixed offset skipped one row too many).
+		if len(measurements) == 0 || !dataRowDate.MatchString(measurements[0]) {
+			continue
 		}
+
+		record, err := measurement.ParseMeasurement(measurements, LakeName)
+		if err != nil {
+			slog.Error("error parsing measurement", "error", err, "measurements", measurements)
+			continue
+		}
+		records = append(records, record)
 	}
 
 	return records, nil

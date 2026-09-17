@@ -45,6 +45,16 @@ func TestGetAllRecords_RealPage(t *testing.T) {
 			t.Errorf("record %d: measuredAt is nil", i)
 		}
 	}
+	// The fixture has 168 data rows; all should parse (the old fixed-offset
+	// skip dropped the oldest row).
+	if len(records) != 168 {
+		t.Errorf("parsed %d records, want 168", len(records))
+	}
+	// The oldest row (10SEP2026 0900) must be present, at level 912.79.
+	if records[0].Level != 912.79 {
+		t.Errorf("first (oldest) record level = %v, want 912.79 (oldest row must not be dropped)", records[0].Level)
+	}
+
 	t.Logf("parsed %d records; first level=%v, last level=%v",
 		len(records), records[0].Level, records[len(records)-1].Level)
 }
