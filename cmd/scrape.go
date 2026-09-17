@@ -49,8 +49,32 @@ var scrapeCmd = &cobra.Command{
 				record, err := tablerock.GetLatestRecord(tablerock.LakeURL)
 				if err != nil {
 					slog.Error("error getting latest record", "error", err)
+					os.Exit(1)
 				}
+
+				// Temperature is not part of the USACE tabular data, so fetch
+				// it from the configured source and attach it to the current
+				// reading. A failure here is non-fatal: level data is still
+				// stored, temperature is simply left unset.
+				tempToken := viper.GetString(whiteriversky_api_token)
+				if tempToken != "" {
+					tempURL := viper.GetString(whiteriversky_api_url)
+					if temp, tErr := tablerock.GetTemperature(tempURL, tempToken); tErr != nil {
+						slog.Error("error getting temperature", "error", tErr)
+					} else {
+						record.Temperature = temp
+					}
+				} else {
+					slog.Warn("temperature source not configured, skipping temperature",
+						"envVar", "WHITERIVERSKY_API_TOKEN")
+				}
+
 				recordsToStore = append(recordsToStore, record)
+			}
+
+			if len(recordsToStore) == 0 {
+				slog.Error("no records to store")
+				os.Exit(1)
 			}
 
 			if dryRun {
@@ -73,6 +97,10 @@ var scrapeCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			err = sheetsCli.AppendToSheet(ctx, tablerock.SheetName, recordsToStore)
+			if err != nil {
+				slog.Error("error appending to sheet", "error", err)
+				os.Exit(1)
+			}
 
 			dalCli, err := dal.New()
 			if err != nil {

@@ -4,10 +4,28 @@ import (
 	"log/slog"
 	"strconv"
 	"time"
+	// Embed the timezone database so time.LoadLocation works regardless of
+	// whether the container base image ships tzdata.
+	_ "time/tzdata"
 
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
+
+// lakeLocation is the timezone the USACE tabular timestamps are reported in
+// (project-local Central time). Timestamps must be parsed in this zone rather
+// than time.Local, which would depend on the container's TZ and silently shift
+// every measurement by several hours.
+var lakeLocation = loadLakeLocation("America/Chicago")
+
+func loadLakeLocation(name string) *time.Location {
+	loc, err := time.LoadLocation(name)
+	if err != nil {
+		slog.Error("error loading location, falling back to UTC", "location", name, "error", err)
+		return time.UTC
+	}
+	return loc
+}
 
 func parseDatetime(dateStr string, timeStr string) (*time.Time, error) {
 	addDate := false
@@ -23,7 +41,7 @@ func parseDatetime(dateStr string, timeStr string) (*time.Time, error) {
 	layout := "02Jan20061504"
 
 	// Parse the combined string to a time.Time value
-	result, err := time.ParseInLocation(layout, combinedString, time.Local)
+	result, err := time.ParseInLocation(layout, combinedString, lakeLocation)
 	if err != nil {
 		slog.Error("error parsing datetime", "error", err)
 		return nil, err
