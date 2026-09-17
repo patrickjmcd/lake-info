@@ -5,12 +5,14 @@ import (
 	"github.com/patrickjmcd/gsheets"
 	"github.com/patrickjmcd/lake-info/dal"
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
+	"github.com/patrickjmcd/lake-info/lib/cda"
 	"github.com/patrickjmcd/lake-info/lib/measurement"
 	"github.com/patrickjmcd/lake-info/lib/tablerock"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log/slog"
 	"os"
+	"time"
 )
 
 func init() {
@@ -46,7 +48,7 @@ var scrapeCmd = &cobra.Command{
 					recordsToStore = r
 				}
 			} else {
-				record, err := tablerock.GetLatestRecord(tablerock.LakeURL)
+				record, err := latestTableRockRecord(ctx)
 				if err != nil {
 					slog.Error("error getting latest record", "error", err)
 					os.Exit(1)
@@ -116,4 +118,26 @@ var scrapeCmd = &cobra.Command{
 		}
 
 	},
+}
+
+// latestTableRockRecord returns the most recent complete Table Rock reading.
+// It prefers the CWMS Data API (structured JSON, valid TLS, UTC timestamps) and
+// falls back to the tab7d HTML scraper when CDA is disabled, errors, or has no
+// complete row yet. Set CDA_DISABLED=true to force the HTML scraper.
+func latestTableRockRecord(ctx context.Context) (*lakeinfov1.LakeInfoMeasurement, error) {
+	if viper.GetBool(cda_disabled) {
+		slog.Info("CDA disabled, using HTML scraper", "source", "tab7d")
+		return tablerock.GetLatestRecord(tablerock.LakeURL)
+	}
+
+	end := time.Now().UTC()
+	begin := end.Add(-48 * time.Hour)
+	record, err := cda.New().GetLatestCompleteRecord(ctx, begin, end)
+	if err != nil {
+		slog.Warn("CDA fetch failed, falling back to HTML scraper", "error", err, "source", "tab7d")
+		return tablerock.GetLatestRecord(tablerock.LakeURL)
+	}
+	slog.Info("fetched latest record from CDA",
+		"source", "cwms-data-api", "measuredAt", record.MeasuredAt.AsTime())
+	return record, nil
 }
