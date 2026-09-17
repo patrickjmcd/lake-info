@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.3](https://github.com/patrickjmcd/lake-info/compare/v1.6.2...v1.6.3) (2026-09-17)
+
+
+### Bug Fixes
+
+* harden table rock scrape/store path ([3be9789](https://github.com/patrickjmcd/lake-info/commit/3be978921eba401fbbe4c0707ebab86e3a80d348))
+* stop dropping the oldest data row in table rock scrape ([4f2125a](https://github.com/patrickjmcd/lake-info/commit/4f2125a2f36e58d131b90982bf4a20c56ecf704f))
+
 ## [1.6.2](https://github.com/patrickjmcd/lake-info/compare/v1.6.1...v1.6.2) (2026-01-18)
 
 
