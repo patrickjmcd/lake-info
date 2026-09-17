@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/patrickjmcd/lake-info/compare/v1.6.3...v1.7.0) (2026-09-17)
+
+
+### Features
+
+* use CWMS Data API for table rock scrape, HTML fallback ([#25](https://github.com/patrickjmcd/lake-info/issues/25)) ([316b5be](https://github.com/patrickjmcd/lake-info/commit/316b5be162f0c98e700036cb63e643fe4a02369c))
+
 ## [1.6.3](https://github.com/patrickjmcd/lake-info/compare/v1.6.2...v1.6.3) (2026-09-17)
 
 
