@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.1](https://github.com/patrickjmcd/lake-info/compare/v1.7.0...v1.7.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* make Google Sheets export best-effort, store to Mongo first ([ae42df2](https://github.com/patrickjmcd/lake-info/commit/ae42df224f313072d536d00eed2679de507c60ed))
+* skip duplicate measurements when storing lake info ([95a968a](https://github.com/patrickjmcd/lake-info/commit/95a968aebcb940a6b459d0b4a6077ebe3bb56627))
+
 ## [1.7.0](https://github.com/patrickjmcd/lake-info/compare/v1.6.3...v1.7.0) (2026-09-17)
 
 
