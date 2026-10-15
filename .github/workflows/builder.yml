@@ -38,7 +38,7 @@ jobs:
           go-version-file: "go.mod"
           check-latest: true
 
-      - uses: ko-build/setup-ko@v0.6
+      - uses: ko-build/setup-ko@v0.10
 
       - name: Build Tagged Image
         run: |
