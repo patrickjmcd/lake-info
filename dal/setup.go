@@ -2,7 +2,7 @@ package dal
 
 import (
 	"context"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func (m *Client) Setup(ctx context.Context) error {
