@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.2](https://github.com/patrickjmcd/lake-info/compare/v1.7.1...v1.7.2) (2026-10-15)
+
+
+### Bug Fixes
+
+* **deps:** migrate dal to mongo-driver v2 ([#39](https://github.com/patrickjmcd/lake-info/issues/39)) ([9b3798b](https://github.com/patrickjmcd/lake-info/commit/9b3798bd12bd8f2cf83658b4a03084fbac4f3aa4))
+
 ## [1.7.1](https://github.com/patrickjmcd/lake-info/compare/v1.7.0...v1.7.1) (2026-09-17)
 
 
