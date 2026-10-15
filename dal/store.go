@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (m *Client) StoreLakeInfo(ctx context.Context, measurements []*lakeinfov1.LakeInfoMeasurement) error {
@@ -14,7 +13,7 @@ func (m *Client) StoreLakeInfo(ctx context.Context, measurements []*lakeinfov1.L
 	mm := bson.A{}
 	skipped := 0
 	for _, v := range measurements {
-		measuredAt := primitive.NewDateTimeFromTime(v.MeasuredAt.AsTime())
+		measuredAt := bson.NewDateTimeFromTime(v.MeasuredAt.AsTime())
 
 		// Skip a record that is already stored for this lake and timestamp.
 		// The collection is a MongoDB time-series collection, which does not
@@ -43,7 +42,7 @@ func (m *Client) StoreLakeInfo(ctx context.Context, measurements []*lakeinfov1.L
 			"spillwayReleaseRate": v.SpillwayReleaseRate,
 			"turbineReleaseRate":  v.TurbineReleaseRate,
 			"measuredAt":          measuredAt,
-			"createdAt":           primitive.NewDateTimeFromTime(v.CreatedAt.AsTime()),
+			"createdAt":           bson.NewDateTimeFromTime(v.CreatedAt.AsTime()),
 		}
 		mm = append(mm, record)
 	}

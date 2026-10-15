@@ -3,15 +3,12 @@ package dal
 import (
 	"context"
 	"fmt"
-	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
-
 	"os"
 	"time"
 
-	googleRegistry "github.com/pepper-iot/protomongo-google"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Client struct {
@@ -26,17 +23,11 @@ const collectionName = "level"
 type ClientOption func(*Client)
 
 func NewConnectionAsync(ctx context.Context, cancel context.CancelFunc, endpoint string, ch chan *Client) error {
+	o := options.Client().
+		ApplyURI(endpoint).
+		SetServerSelectionTimeout(10 * time.Second)
 
-	o := options.Client()
-	o.Monitor = otelmongo.NewMonitor()
-	o.SetServerSelectionTimeout(10 * time.Second)
-
-	reg := bson.NewRegistry()
-	googleRegistry.RegisterAll(reg)
-
-	o.SetRegistry(reg)
-
-	client, err := mongo.Connect(ctx, o.ApplyURI(endpoint))
+	client, err := mongo.Connect(o)
 	if err != nil {
 		cancel()
 		return fmt.Errorf("error connecting to mongodb: %w", err)

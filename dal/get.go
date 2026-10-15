@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/labstack/gommon/log"
 	lakeinfov1 "github.com/patrickjmcd/lake-info/gen/lakeinfo/v1"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
@@ -46,7 +46,7 @@ func (m *Client) GetLakeInfo(ctx context.Context, lakeName string, startTime, en
 
 	log.Printf("Query: %+v", find)
 	o := options.Find()
-	o.SetSort(bson.M{"measuredAt": -1})
+	o.SetSort(bson.D{{Key: "measuredAt", Value: -1}})
 	if latest {
 		o.SetLimit(1)
 	}
@@ -55,10 +55,13 @@ func (m *Client) GetLakeInfo(ctx context.Context, lakeName string, startTime, en
 	if err != nil {
 		return nil, err
 	}
-	var measurements []*lakeinfov1.LakeInfoMeasurement
-	err = cur.All(ctx, &measurements)
-	if err != nil {
+	var docs []levelDocument
+	if err := cur.All(ctx, &docs); err != nil {
 		return nil, err
+	}
+	measurements := make([]*lakeinfov1.LakeInfoMeasurement, len(docs))
+	for i, d := range docs {
+		measurements[i] = d.toProto()
 	}
 	return measurements, nil
 }
